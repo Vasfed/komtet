@@ -5,6 +5,9 @@ require 'openssl'
 module Komtet
 
   class Transport
+
+    DEFAULT_API_URL='https://kassa.komtet.ru/api/shop/v1/'
+
     # middleware for request signatures
     class RequestSignatureMiddleware < Faraday::Middleware
       def initialize(app, shop_id, signature_key)
@@ -42,14 +45,14 @@ module Komtet
 
     def post_task(content, queue_id=@queue_id)
       raise ArgumentError, "queue_id is not integer" unless queue_id.is_a?(Integer)
-      res = transport.post("queues/#{queue_id}/task")
-      raise "non success: #{res.code}" unless res.success?
+      res = transport.post("queues/#{queue_id}/task", content)
+      raise "non success: #{res.status}: #{res.body}" unless res.success?
       res.body
     end
 
     def task_result(task_id)
       res = transport.get("tasks/#{task_id}")
-      raise "non success: #{res.code}" unless res.success?
+      raise "non success: #{res.status}: #{res.body}" unless res.success?
       res.body
     end
 
