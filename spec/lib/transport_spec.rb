@@ -2,9 +2,13 @@
 
 RSpec.describe Komtet::Transport do
 
-
+  let(:credentials){
+    Komtet::Credentials.new(
+      shop_id:'some_shop123', signature_key:'key1234'
+    )
+  }
   subject{
-    described_class.new('https://kassa.komtet.ru/api/shop/v1/', 'some_shop123', 'key1234')
+    described_class.new('https://kassa.komtet.ru/api/shop/v1/', credentials)
   }
 
   describe "signs requests" do

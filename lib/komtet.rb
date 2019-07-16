@@ -1,4 +1,5 @@
 require "komtet/version"
+require "komtet/credentials"
 require "komtet/transport"
 
 module Komtet
