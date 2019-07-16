@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    komtet (0.0.1)
+    komtet (0.0.2)
       faraday (>= 0.15)
       faraday_middleware
 
