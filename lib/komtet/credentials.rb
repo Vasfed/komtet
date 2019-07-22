@@ -15,17 +15,19 @@ module Komtet
       @queue_id = queue_id
     end
 
-    def self.from_hash(hash, key_pass:)
-      cipher = OpenSSL::Cipher.new('aes-256-cbc')
-      cipher.decrypt
-      cipher.key = key_pass
-      cipher.iv  = Base64.strict_decode64(hash[:signature_key_iv] || hash["signature_key_iv"])
-      decoded_signature = cipher.update(
-        Base64.strict_decode64(hash[:signature_key_enc] || hash["signature_key_enc"])
-        ) + cipher.final
-      unless Digest::MD5.hexdigest(decoded_signature) == (hash[:signature_key_hash] || hash["signature_key_hash"])
-        # actually there's usually OpenSSL::Cipher::CipherError, but not guaranteed
-        raise "Signature md5 does not match, probably wrong key_pass (bad decrypt)"
+    def self.from_hash(hash, key_pass:nil)
+      unless (decoded_signature = hash[:signature_key] || hash["signature_key"])
+        cipher = OpenSSL::Cipher.new('aes-256-cbc')
+        cipher.decrypt
+        cipher.key = key_pass
+        cipher.iv  = Base64.strict_decode64(hash[:signature_key_iv] || hash["signature_key_iv"])
+        decoded_signature = cipher.update(
+          Base64.strict_decode64(hash[:signature_key_enc] || hash["signature_key_enc"])
+          ) + cipher.final
+        unless Digest::MD5.hexdigest(decoded_signature) == (hash[:signature_key_hash] || hash["signature_key_hash"])
+          # actually there's usually OpenSSL::Cipher::CipherError, but not guaranteed
+          raise "Signature md5 does not match, probably wrong key_pass (bad decrypt)"
+        end
       end
 
       new(
