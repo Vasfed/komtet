@@ -53,6 +53,20 @@ module Komtet
       res.body
     end
 
+    def queue_status(queue_id=@credentials.queue_id)
+      res = transport.get("queues/#{ queue_id }")
+      # {"id"=>6395, "state"=>"active"} (либо passive)
+      # либо 403 {"title"=>"Ошибка авторизации", "description"=>"Проверьте...", "code"=>"AUT00"}
+
+      if res.success?
+        return res.body["state"]
+      elsif res.status == 403
+        return 'access_denied'
+      else
+        raise "non success: #{res.status}: #{res.body}"
+      end
+    end
+
   end
 
 end

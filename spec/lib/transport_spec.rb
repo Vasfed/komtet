@@ -70,4 +70,25 @@ RSpec.describe Komtet::Transport do
     end
   end
 
+  describe "get queue status" do
+    let(:response){ { id: 6395, state: "active" } }
+    let(:status){ 200 }
+    let!(:request){
+      stub_request(:get, "https://kassa.komtet.ru/api/shop/v1/queues/6395").
+        to_return(status: status, body: response.to_json, headers: {'Content-Type' => "application/json; charset=UTF-8"})      
+    }
+
+    it "works" do
+      expect(subject.queue_status(6395)).to eq 'active'
+    end
+
+    context "when access denied" do
+      let(:response){ { title:"Ошибка авторизации", description:"Проверьте правильность написания идентификатора магазина и его секрета", code:"AUT00" } }
+      let(:status){ 403 }
+      it "works" do
+        expect(subject.queue_status(6395)).to eq 'access_denied'
+      end
+    end
+  end
+
 end
